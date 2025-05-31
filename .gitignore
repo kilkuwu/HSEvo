@@ -1,0 +1,8 @@
+__pycache__/
+.idea/
+outputs/
+.venv/
+
+run.bat
+
+.env

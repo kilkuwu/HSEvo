@@ -1,0 +1,7 @@
+hydra-core 
+numpy 
+joblib
+torch
+litellm
+typing_extensions
+scipy
