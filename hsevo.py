@@ -149,7 +149,8 @@ class HSEvo:
             messages = format_messages(self.cfg, pre_messages)
             messages_lst.append(messages)
 
-            logging.info("Initial Population Prompt: \nSystem Prompt: \n" + system + "\nUser Prompt: \n" + user)
+            # comment out because it is long and not necessary to print every time
+            # logging.info("Initial Population Prompt: \nSystem Prompt: \n" + system + "\nUser Prompt: \n" + user)
 
             # Write to file
             file_name = f"problem_iter{self.iteration}_prompt{i}.txt"
@@ -397,7 +398,7 @@ class HSEvo:
 
         flash_reflection_res = multi_chat_completion([messages], 1, self.cfg.model, self.cfg.temperature)[0]
         self.cal_usage_LLM([messages], flash_reflection_res)
-        print(flash_reflection_res)
+        logging.info("Flash reflection result: ", flash_reflection_res)
         analyze_start = flash_reflection_res.find("**Analysis:**") + len("**Analysis:**")
         exp_start = flash_reflection_res.find("**Experience:**")
 
