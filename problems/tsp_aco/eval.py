@@ -36,20 +36,6 @@ def solve(dist_mat):
     # Set random seed for reproducibility
     random.seed(42)
     
-    # Create ACO instance - it will automatically set parameters based on problem size
-    aco = ACO(dist_mat)
-    
-    # Override the heuristic calculation with the evolved function
-    aco.heuristic = heuristics(dist_mat)
-    
-    # Add small epsilon to avoid zero values
-    for i in range(len(aco.heuristic)):
-        for j in range(len(aco.heuristic[i])):
-            if aco.heuristic[i][j] < 1e-9:
-                aco.heuristic[i][j] = 1e-9
-            else:
-                aco.heuristic[i][j] += 1e-9
-    
     aco = ACO(dist_mat, heu)
     best_distance = aco.run()
     return best_distance
