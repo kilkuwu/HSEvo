@@ -5,6 +5,7 @@ Translated from C++ implementation in orig.cpp
 """
 
 import random
+import time
 from typing import List, Tuple
 
 def mutate(number_of_city: int, child: List[int], distance_matrix: List[List[float]]) -> List[int]:
@@ -77,7 +78,6 @@ class GeneticAlgorithmTSP:
         self.population: List[List[int]] = []
         self.population_size: int = 0
         self.number_of_city: int = 0
-        self.max_iteration: int = 0
         # self.gap: int = 0
         self.solution: float = 0.0
         self.percent: float = 0.0
@@ -258,28 +258,27 @@ class GeneticAlgorithmTSP:
     
     def run(self) -> float:
         """Main genetic algorithm execution."""
+
+        begin_time = time.time()
         # print("Running Genetic Algorithm for TSP...")
         # Set parameters based on problem size
         self.select_probability = 0.7
         
         if self.number_of_city <= 20:
-            self.max_iteration = 10000
             self.mutate_probability = 0.01
+            self.gap = 5000
             self.initial_probability = 0.8
         elif self.number_of_city <= 50:
-            self.max_iteration = 1000
             self.mutate_probability = 0.01
-            # self.gap = 1000
+            self.gap = 1000
             self.initial_probability = 0.85
         elif self.number_of_city <= 100:
-            self.max_iteration = 400
             self.mutate_probability = 0.005
-            # self.gap = 1000
+            self.gap = 200
             self.initial_probability = 0.9
         else:
-            self.max_iteration = 200
             self.mutate_probability = 0.005
-            # self.gap = 300
+            self.gap = 200
             self.initial_probability = 1.0
         
         self.population_size = min(self.number_of_city // 2, 100)
@@ -290,19 +289,19 @@ class GeneticAlgorithmTSP:
         self.result_list = [self.solution]
         
         # Evolution loop
-        for i in range(self.max_iteration):
+
+        i = 0
+        while (time.time() - begin_time < 9):
             self.population = self.generate_new_population(self.population)
             current_best = self.best_fitness()
             self.solution = min(current_best, self.solution)
             # print(f"Generation {i}: {current_best}")
             self.result_list.append(self.solution)
-            
-            
-            # Early stopping condition
-            # if (i > self.gap and 
-            #     self.result_list[i - self.gap] == self.result_list[i]):
-            #     print(f"Early stopping at generation {i}")
-            #     break
+            i += 1
+
+            if (i > self.gap and 
+                self.result_list[i - self.gap] == self.result_list[i]):
+                break
         
         return self.solution
     
