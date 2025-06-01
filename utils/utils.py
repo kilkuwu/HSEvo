@@ -143,8 +143,6 @@ def extract_code_from_generator(content):
     if code_string is None:
         return None
     # Add import statements if not present
-    if "import" not in code_string:
-        code_string = "import numpy as np\nimport random\nimport math\nimport scipy\nimport torch\n" + code_string
     return code_string
 
 
@@ -179,7 +177,7 @@ def extract_to_hs(input_string: str):
     code_blocks = input_string.split("```python\n")[1:]
 
     try:
-        parameter_ranges_block = "import numpy as np\n" + code_blocks[1].split("```")[0].strip()
+        parameter_ranges_block = code_blocks[1].split("```")[0].strip()
         if any(keyword in parameter_ranges_block for keyword in ['inf', 'np.inf', 'None']):
             return None, None
         exec_globals = {}
