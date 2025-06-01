@@ -127,21 +127,22 @@ def extract_code_from_generator(content):
     code_string = re.search(pattern_code, content, re.DOTALL)
     code_string = code_string.group(1).strip() if code_string is not None else None
     if code_string is None:
-        # Find the line that starts with "def" and the line that starts with "return", and extract the code in between
-        lines = content.split('\n')
-        start = None
-        end = None
-        for i, line in enumerate(lines):
-            if line.startswith('def'):
-                start = i
-            if 'return' in line:
-                end = i
-                break
-        if start is not None and end is not None:
-            code_string = '\n'.join(lines[start:end + 1])
+        code_string = content
+        # # Find the line that starts with "def" and the line that starts with "return", and extract the code in between
+        # lines = content.split('\n')
+        # start = None
+        # end = None
+        # for i, line in enumerate(lines):
+        #     if line.startswith('def'):
+        #         start = i
+        #     if 'return' in line:
+        #         end = i
+        #         break
+        # if start is not None and end is not None:
+        #     code_string = '\n'.join(lines[start:end + 1])
 
-    if code_string is None:
-        return None
+    # if code_string is None:
+    #     return None
     # Add import statements if not present
     if "import" not in code_string:
         code_string = "from typing import List, Tuple\nimport random\nimport math\n" + code_string
