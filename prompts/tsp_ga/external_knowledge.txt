@@ -1,0 +1,10 @@
+- Consider combining multiple local search operators like 2-opt, 3-opt, Or-opt, and Lin-Kernighan moves
+- Try adaptive strategies that choose different operators based on problem size, tour quality, or search progress
+- Implement multi-level approaches that apply different intensity of local search based on solution characteristics
+- Consider probability-based selection of local search operators rather than deterministic size-based selection
+- Try iterative improvement with different neighborhood structures (edge exchanges, node relocations, chain moves)
+- Implement variable neighborhood search (VNS) that systematically changes neighborhood structures
+- Consider incorporating problem-specific knowledge like nearest neighbor information or edge frequency analysis
+- Try hybrid approaches combining deterministic hill climbing with randomized perturbations
+- Implement adaptive step sizes or search intensities based on improvement patterns
+- Consider using different termination criteria for local search based on solution quality or computation budget

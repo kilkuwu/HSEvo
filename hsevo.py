@@ -108,7 +108,9 @@ class HSEvo:
     def init_population(self) -> None:
         # Evaluate the seed function, and set it as Elite
         logging.info("Evaluating seed function...")
-        code = extract_code_from_generator(self.seed_func).replace("v1", "v2")
+        # code = extract_code_from_generator(self.seed_func).replace("v1", "v2")
+        code = self.seed_func.replace("v1", "v2")
+        # code = extract_code_from_generator(self.seed_func).replace("v1", "v2")
         logging.info("Seed function code: \n" + code)
         seed_ind = {
             "stdout_filepath": f"problem_iter{self.iteration}_stdout0.txt",
@@ -303,10 +305,10 @@ class HSEvo:
         # Execute the python file with flags
         with open(individual["stdout_filepath"], 'w') as f:
             eval_file_path = f'{self.root_dir}/problems/{self.problem}/eval.py' if self.problem_type != "black_box" else f'{self.root_dir}/problems/{self.problem}/eval_black_box.py'
-            process = subprocess.Popen([f'{self.root_dir}/.venv/Scripts/python', '-u', eval_file_path, f'{self.problem_size}', self.root_dir, "train"],
-                                       stdout=f, stderr=f)
             # process = subprocess.Popen([f'{self.root_dir}/.venv/Scripts/python', '-u', eval_file_path, f'{self.problem_size}', self.root_dir, "train"],
             #                            stdout=f, stderr=f)
+            process = subprocess.Popen(['pypy', '-u', eval_file_path, f'{self.problem_size}', self.root_dir, "train"],
+                                       stdout=f, stderr=f)
 
         block_until_running(individual["stdout_filepath"], log_status=True, iter_num=self.iteration,
                             response_id=response_id)

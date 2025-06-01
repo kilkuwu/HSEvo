@@ -1,1 +1,1 @@
-def heuristics_v{version}(distance_matrix: np.ndarray) -> np.ndarray:
+def heuristics_v{version}(distance_matrix: List[List[float]]) -> List[List[float]]:

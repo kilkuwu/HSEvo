@@ -1,2 +1,14 @@
-- Try combining various factors to determine how promising it is to select an edge.
-- Try sparsifying the matrix by setting unpromising elements to zero.
+- The heuristic function guides ant colony optimization by providing local information about edge attractiveness
+- Higher heuristic values should indicate more promising edges (shorter distances, better connectivity, etc.)
+- Common approaches include inverse distance (1/distance), inverse squared distance (1/distance²), or combinations
+- Consider distance-based metrics: closer cities are generally more attractive
+- Try combining multiple factors: distance, centrality, connectivity patterns
+- Sparsification: set very low heuristic values to zero to focus search on promising regions
+- Avoid division by zero: handle diagonal elements (i==j) and zero distances appropriately
+- Normalization: consider normalizing heuristic values to a specific range for stability
+- Non-linear transformations: apply exponential, logarithmic, or power functions to emphasize differences
+- Adaptive heuristics: use different strategies based on problem size or distance distribution
+- Local vs global information: balance immediate attractiveness with broader tour considerations
+- Edge selection probability in ACO is proportional to: (pheromone^α) * (heuristic^β)
+- The function should return a 2D list structure matching the input distance matrix dimensions
+- Pure Python implementation: use list comprehensions, loops, and basic math operations only

@@ -1,5 +1,5 @@
-import torch
-from torch.distributions import Categorical
+import random
+import math
 
 class ACO():
 
@@ -9,109 +9,154 @@ class ACO():
                  n_ants=30, 
                  decay=0.9,
                  alpha=1,
-                 beta=1,
-                 device='cpu'
+                 beta=1
                  ):
         
         self.problem_size = len(distances)
-        self.distances  = torch.tensor(distances, device=device) if not isinstance(distances, torch.Tensor) else distances
+        self.distances = distances
         self.n_ants = n_ants
         self.decay = decay
         self.alpha = alpha
         self.beta = beta
-        
-        self.pheromone = torch.ones_like(self.distances)
-        self.heuristic = torch.tensor(heuristic, device=device) if not isinstance(heuristic, torch.Tensor) else heuristic
+          # Initialize pheromone matrix
+        self.pheromone = [[1.0 for _ in range(self.problem_size)] for _ in range(self.problem_size)]
+        self.heuristic = heuristic
 
         self.shortest_path = None
         self.lowest_cost = float('inf')
 
-        self.device = device
-
-    @torch.no_grad()
     def run(self, n_iterations):
-        for _ in range(n_iterations):
-            paths = self.gen_path(require_prob=False)
+        for iteration in range(n_iterations):
+            paths = self.gen_paths()
             costs = self.gen_path_costs(paths)
             
-            best_cost, best_idx = costs.min(dim=0)
+            # Find best path in this iteration
+            best_cost = min(costs)
+            best_idx = costs.index(best_cost)
+            
             if best_cost < self.lowest_cost:
-                self.shortest_path = paths[:, best_idx]
+                self.shortest_path = paths[best_idx][:]
                 self.lowest_cost = best_cost
             
-            self.update_pheronome(paths, costs)
+            self.update_pheromone(paths, costs)
 
         return self.lowest_cost
        
-    @torch.no_grad()
-    def update_pheronome(self, paths, costs):
+    def update_pheromone(self, paths, costs):
         '''
+        Update pheromone based on paths and their costs
         Args:
-            paths: torch tensor with shape (problem_size, n_ants)
-            costs: torch tensor with shape (n_ants,)
+            paths: list of paths, each path is a list of cities
+            costs: list of costs corresponding to each path
         '''
-        self.pheromone = self.pheromone * self.decay 
-        for i in range(self.n_ants):
-            path = paths[:, i]
-            cost = costs[i]
-            self.pheromone[path, torch.roll(path, shifts=1)] += 1.0/cost
-            self.pheromone[torch.roll(path, shifts=1), path] += 1.0/cost
+        # Decay pheromone
+        for i in range(self.problem_size):
+            for j in range(self.problem_size):
+                self.pheromone[i][j] *= self.decay
+        
+        # Add pheromone based on ant paths
+        for ant_idx in range(self.n_ants):
+            path = paths[ant_idx]
+            cost = costs[ant_idx]
+            pheromone_deposit = 1.0 / cost
+            
+            # Add pheromone to edges in the path
+            for i in range(len(path)):
+                from_city = path[i]
+                to_city = path[(i + 1) % len(path)]  # Wrap around for TSP
+                self.pheromone[from_city][to_city] += pheromone_deposit
+                self.pheromone[to_city][from_city] += pheromone_deposit
 
-    @torch.no_grad()
     def gen_path_costs(self, paths):
         '''
+        Calculate total distance for each path
         Args:
-            paths: torch tensor with shape (problem_size, n_ants)
+            paths: list of paths, each path is a list of cities
         Returns:
-                Lengths of paths: torch tensor with shape (n_ants,)
+            costs: list of total distances
         '''
-        assert paths.shape == (self.problem_size, self.n_ants)
-        u = paths.T # shape: (n_ants, problem_size)
-        v = torch.roll(u, shifts=1, dims=1)  # shape: (n_ants, problem_size)
-        assert (self.distances[u, v] > 0).all()
-        return torch.sum(self.distances[u, v], dim=1)
+        costs = []
+        for path in paths:
+            total_cost = 0.0
+            for i in range(len(path)):
+                from_city = path[i]
+                to_city = path[(i + 1) % len(path)]  # Wrap around for TSP
+                total_cost += self.distances[from_city][to_city]
+            costs.append(total_cost)
+        return costs
 
-    def gen_path(self, require_prob=False):
+    def gen_paths(self):
         '''
-        Tour contruction for all ants
+        Generate paths for all ants
         Returns:
-            paths: torch tensor with shape (problem_size, n_ants), paths[:, i] is the constructed tour of the ith ant
-            log_probs: torch tensor with shape (problem_size, n_ants), log_probs[i, j] is the log_prob of the ith action of the jth ant
+            paths: list of paths, each path is a list of cities
         '''
-        start = torch.randint(low=0, high=self.problem_size, size=(self.n_ants,), device=self.device)
-        mask = torch.ones(size=(self.n_ants, self.problem_size), device=self.device)
-        mask[torch.arange(self.n_ants, device=self.device), start] = 0
+        paths = []
+        for ant in range(self.n_ants):
+            path = self.gen_single_path()
+            paths.append(path)
+        return paths
         
-        paths_list = [] # paths_list[i] is the ith move (tensor) for all ants
-        paths_list.append(start)
-        
-        log_probs_list = [] # log_probs_list[i] is the ith log_prob (tensor) for all ants' actions
-        
-        prev = start
-        for _ in range(self.problem_size-1):
-            actions, log_probs = self.pick_move(prev, mask, require_prob)
-            paths_list.append(actions)
-            if require_prob:
-                log_probs_list.append(log_probs)
-                mask = mask.clone()
-            prev = actions
-            mask[torch.arange(self.n_ants, device=self.device), actions] = 0
-        
-        if require_prob:
-            return torch.stack(paths_list), torch.stack(log_probs_list)
-        else:
-            return torch.stack(paths_list)
-        
-    def pick_move(self, prev, mask, require_prob):
+    def gen_single_path(self):
         '''
+        Generate a single path for one ant
+        Returns:
+            path: list of cities representing the tour
+        '''
+        # Start from a random city
+        start_city = random.randint(0, self.problem_size - 1)
+        path = [start_city]
+        visited = [False] * self.problem_size
+        visited[start_city] = True
+        
+        current_city = start_city
+        
+        # Build path by selecting next cities probabilistically
+        for _ in range(self.problem_size - 1):
+            next_city = self.pick_next_city(current_city, visited)
+            path.append(next_city)
+            visited[next_city] = True
+            current_city = next_city
+            
+        return path
+        
+    def pick_next_city(self, current_city, visited):
+        '''
+        Pick next city based on pheromone and heuristic information
         Args:
-            prev: tensor with shape (n_ants,), previous nodes for all ants
-            mask: bool tensor with shape (n_ants, p_size), masks (0) for the visited cities
+            current_city: current city index
+            visited: list of booleans indicating visited cities
+        Returns:
+            next_city: index of selected next city
         '''
-        pheromone = self.pheromone[prev] # shape: (n_ants, p_size)
-        heuristic = self.heuristic[prev] # shape: (n_ants, p_size)
-        dist = ((pheromone ** self.alpha) * (heuristic ** self.beta) * mask) # shape: (n_ants, p_size)
-        dist = Categorical(dist)
-        actions = dist.sample() # shape: (n_ants,)
-        log_probs = dist.log_prob(actions) if require_prob else None # shape: (n_ants,)
-        return actions, log_probs
+        # Calculate probabilities for unvisited cities
+        probabilities = []
+        unvisited_cities = []
+        
+        for city in range(self.problem_size):
+            if not visited[city]:
+                pheromone_val = self.pheromone[current_city][city] ** self.alpha
+                heuristic_val = self.heuristic[current_city][city] ** self.beta
+                probability = pheromone_val * heuristic_val
+                probabilities.append(probability)
+                unvisited_cities.append(city)
+        
+        # Normalize probabilities
+        total_prob = sum(probabilities)
+        if total_prob == 0:
+            # If all probabilities are 0, choose randomly
+            return random.choice(unvisited_cities)
+        
+        probabilities = [p / total_prob for p in probabilities]
+        
+        # Select city based on probabilities (roulette wheel selection)
+        rand_val = random.random()
+        cumulative_prob = 0.0
+        
+        for i, prob in enumerate(probabilities):
+            cumulative_prob += prob
+            if rand_val <= cumulative_prob:
+                return unvisited_cities[i]
+        
+        # Fallback (should not reach here)
+        return unvisited_cities[-1]

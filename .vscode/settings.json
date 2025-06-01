@@ -1,0 +1,16 @@
+{
+    "files.associations": {
+        "*.css": "tailwindcss",
+        "chrono": "cpp",
+        "numeric": "cpp",
+        "format": "cpp",
+        "fstream": "cpp",
+        "istream": "cpp",
+        "ostream": "cpp",
+        "shared_mutex": "cpp",
+        "system_error": "cpp",
+        "regex": "cpp",
+        "typeinfo": "cpp",
+        "variant": "cpp"
+    }
+}
