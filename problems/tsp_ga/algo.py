@@ -258,6 +258,7 @@ class GeneticAlgorithmTSP:
     
     def run(self) -> float:
         """Main genetic algorithm execution."""
+        # print("Running Genetic Algorithm for TSP...")
         # Set parameters based on problem size
         self.select_probability = 0.7
         
@@ -271,12 +272,12 @@ class GeneticAlgorithmTSP:
             # self.gap = 1000
             self.initial_probability = 0.85
         elif self.number_of_city <= 100:
-            self.max_iteration = 500
+            self.max_iteration = 400
             self.mutate_probability = 0.005
             # self.gap = 1000
             self.initial_probability = 0.9
         else:
-            self.max_iteration = 300
+            self.max_iteration = 200
             self.mutate_probability = 0.005
             # self.gap = 300
             self.initial_probability = 1.0
@@ -293,8 +294,7 @@ class GeneticAlgorithmTSP:
             self.population = self.generate_new_population(self.population)
             current_best = self.best_fitness()
             self.solution = min(current_best, self.solution)
-            # if (self.solution < self.result_list[-1]):
-            #     print(f"Generation {i}: {current_best}")
+            # print(f"Generation {i}: {current_best}")
             self.result_list.append(self.solution)
             
             
@@ -325,7 +325,7 @@ def main():
     """Main function for standalone execution."""
     
     # Set random seed for reproducibility
-    random.seed(0)
+    random.seed(42)
     
     # Create GA instance
     ga = GeneticAlgorithmTSP()

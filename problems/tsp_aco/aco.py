@@ -6,7 +6,6 @@ class ACO():
     def __init__(self, 
                  distances,
                  heuristic,
-                 n_ants=30, 
                  decay=0.9,
                  alpha=1,
                  beta=1
@@ -14,19 +13,33 @@ class ACO():
         
         self.problem_size = len(distances)
         self.distances = distances
-        self.n_ants = n_ants
         self.decay = decay
         self.alpha = alpha
         self.beta = beta
-          # Initialize pheromone matrix
+        
+        # Set n_ants and n_iterations based on problem size (similar to GA)
+        if self.problem_size <= 20:
+            self.n_ants = 20
+            self.n_iterations = 100
+        elif self.problem_size <= 50:
+            self.n_ants = 30
+            self.n_iterations = 150
+        elif self.problem_size <= 100:
+            self.n_ants = 50
+            self.n_iterations = 200
+        else:
+            self.n_ants = 100
+            self.n_iterations = 250
+            
+        # Initialize pheromone matrix
         self.pheromone = [[1.0 for _ in range(self.problem_size)] for _ in range(self.problem_size)]
         self.heuristic = heuristic
 
         self.shortest_path = None
         self.lowest_cost = float('inf')
 
-    def run(self, n_iterations):
-        for iteration in range(n_iterations):
+    def run(self):
+        for iteration in range(self.n_iterations):
             paths = self.gen_paths()
             costs = self.gen_path_costs(paths)
             

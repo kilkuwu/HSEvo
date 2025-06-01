@@ -84,7 +84,8 @@ if __name__ == "__main__":
     else:
         dataset_dir = path.join(dataset_dir, "val")
         results = []
-        for test_size in [10, 20, 50, 100, 200]:
+        # for test_size in [10, 20, 50, 100, 200]:
+        for test_size in [ 200]:
             times = []
             objs = []
             num_instances = 16  # Use fewer instances for validation

@@ -18,8 +18,7 @@ heuristic_name = get_heuristic_name(gpt, possible_func_names)
 heuristics = getattr(gpt, heuristic_name)
 
 def solve(dist_mat):
-    """Solve TSP using ACO with evolved heuristics function."""
-    # Set diagonal to a large number
+    """Solve TSP using ACO with evolved heuristics function."""    # Set diagonal to a large number
     for i in range(len(dist_mat)):
         dist_mat[i][i] = int(1e9)
     
@@ -37,23 +36,22 @@ def solve(dist_mat):
     # Set random seed for reproducibility
     random.seed(42)
     
-    # Configure ACO parameters based on problem size
-    n_cities = len(dist_mat)
-    if n_cities <= 20:
-        n_ants = 100
-        n_iterations = 500
-    elif n_cities <= 50:
-        n_ants = 100
-        n_iterations = 200
-    elif n_cities <= 100:
-        n_ants = 50
-        n_iterations = 100
-    else:
-        n_ants = 50
-        n_iterations = 100
+    # Create ACO instance - it will automatically set parameters based on problem size
+    aco = ACO(dist_mat)
     
-    aco = ACO(dist_mat, heu, n_ants=n_ants)
-    best_distance = aco.run(n_iterations)
+    # Override the heuristic calculation with the evolved function
+    aco.heuristic = heuristics(dist_mat)
+    
+    # Add small epsilon to avoid zero values
+    for i in range(len(aco.heuristic)):
+        for j in range(len(aco.heuristic[i])):
+            if aco.heuristic[i][j] < 1e-9:
+                aco.heuristic[i][j] = 1e-9
+            else:
+                aco.heuristic[i][j] += 1e-9
+    
+    aco = ACO(dist_mat, heu)
+    best_distance = aco.run()
     return best_distance
 
 def calculate_mean(values):
