@@ -82,10 +82,10 @@ if __name__ == "__main__":
             print(float('inf'))  # Return worst possible score
     
     else:
-        st = time.time()
         dataset_dir = path.join(dataset_dir, "val")
         results = []
         for test_size in [10, 20, 50, 100, 200]:
+            times = []
             objs = []
             num_instances = 16  # Use fewer instances for validation
             
@@ -102,18 +102,24 @@ if __name__ == "__main__":
                             dist_mat.append(row)
                     
                     # Solve instance
-                    print(f"Solving instance {i} of size {test_size}")
+                    start_time = time.time()
                     obj = solve(dist_mat)
+                    end_time = time.time()
+                    elapsed_time = end_time - start_time
+                    times.append(elapsed_time)
+                    print(
+                        f"> Instance {i} took {elapsed_time:.4f}s, result: {obj}")
                     objs.append(obj)
                 else:
                     print(f"[*] Warning: Instance file {instance_file} not found")
             
             if objs:
                 result = calculate_mean(objs)
-                print(f"[*] Average for {test_size}: {objs}")
-                results.append((test_size, result))
-        en = time.time()
+                time_mean = calculate_mean(times)
+                print(f"[*] Average obj for {test_size}: {result}")
+                print(
+                    f"[*] Total: {sum(times):.4f}s, Average: {time_mean:.4f}s")
+                results.append((test_size, result, time_mean))
         print("[*] Final Results:")
-        for size, avg in results:
-            print(f"Size {size}: {avg}")
-        print(f"[*] Total time taken: {en - st:.2f} seconds")
+        for size, avg, tim in results:
+            print(f"Size {size}: {avg} in {tim:.4f}s")

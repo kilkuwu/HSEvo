@@ -1,0 +1,16 @@
+TSP ACO Original Heuristic:
+[*] Final Results:
+Size 10: 1994.9778125
+Size 20: 2006.1207499999998
+Size 50: 2298.73775
+Size 100: 2831.0986874999994
+Size 200: 3731.6469375
+[*] Total time: 296.42 seconds
+TSP GA Original Mutate:
+[*] Final Results:
+Size 10: 1994.9778124999996
+Size 20: 1987.2573749999995
+Size 50: 2227.4546249999994
+Size 100: 2814.896812499999
+Size 200: 3459.01325
+[*] Total time taken: 881.77 seconds
