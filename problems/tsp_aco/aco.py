@@ -1,5 +1,6 @@
 import random
 import math
+import time
 
 class ACO():
 
@@ -19,17 +20,17 @@ class ACO():
         
         # Set n_ants and n_iterations based on problem size (similar to GA)
         if self.problem_size <= 20:
+            self.gap = 2000
             self.n_ants = 20
-            self.n_iterations = 100
         elif self.problem_size <= 50:
+            self.gap = 1000
             self.n_ants = 30
-            self.n_iterations = 150
         elif self.problem_size <= 100:
-            self.n_ants = 50
-            self.n_iterations = 200
+            self.gap = 500
+            self.n_ants = 30
         else:
-            self.n_ants = 100
-            self.n_iterations = 250
+            self.gap = 500
+            self.n_ants = 20
             
         # Initialize pheromone matrix
         self.pheromone = [[1.0 for _ in range(self.problem_size)] for _ in range(self.problem_size)]
@@ -39,10 +40,12 @@ class ACO():
         self.lowest_cost = float('inf')
 
     def run(self):
-        for iteration in range(self.n_iterations):
+        begin_time = time.time()
+        iteration = 0
+        self.result_list = []
+        while (time.time() - begin_time < 9):
             paths = self.gen_paths()
             costs = self.gen_path_costs(paths)
-            
             # Find best path in this iteration
             best_cost = min(costs)
             best_idx = costs.index(best_cost)
@@ -50,8 +53,16 @@ class ACO():
             if best_cost < self.lowest_cost:
                 self.shortest_path = paths[best_idx][:]
                 self.lowest_cost = best_cost
+
             
             self.update_pheromone(paths, costs)
+            self.result_list.append(self.lowest_cost)
+
+            i = iteration
+            if (i > self.gap and 
+                self.result_list[i - self.gap] == self.result_list[i]):
+                break
+            iteration += 1
 
         return self.lowest_cost
        
