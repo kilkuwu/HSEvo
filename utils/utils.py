@@ -94,7 +94,11 @@ def multi_chat_completion(messages_list: list[list[dict]], n, model, temperature
     contents: list[str] = []
     for choice in choices:
         for c in choice:
-            contents.append(c.message.content)
+            if c.message is not None and c.message.content is not None:
+                if isinstance(c.message.content, str):
+                    contents.append(c.message.content)
+                else:
+                    logging.warning(f"Unexpected content type: {type(c.message.content)}")
     return contents
 
 
