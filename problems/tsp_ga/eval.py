@@ -68,9 +68,16 @@ if __name__ == "__main__":
                         dist_mat.append(row)
                 
                 # Solve instance
+                bg = time.time()
                 obj = solve(dist_mat)
-                print(f"[*] Instance {i}: {obj}")
-                objs.append(obj)
+                en = time.time()
+                if en - bg > 10:
+                    print(f"[*] Warning: Instance {i} took too long: {en - bg:.4f}s")
+                    objs.append(float('inf'))  # Append worst possible score
+                    break
+                else: 
+                    print(f"[*] Instance {i}: {obj}")
+                    objs.append(obj)
             else:
                 print(f"[*] Warning: Instance file {instance_file} not found")
         

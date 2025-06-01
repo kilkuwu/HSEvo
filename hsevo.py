@@ -617,6 +617,7 @@ class HSEvo:
         return population_hs, harmony_memory
 
     def harmony_search(self):
+        logging.info("Harmony Search started...")
         system = self.system_hs_prompt
         user = self.hs_prompt.format(code_extract=self.sel_individual_hs())
         pre_messages = {"system": system, "user": user}
@@ -634,18 +635,23 @@ class HSEvo:
         responses = multi_chat_completion([messages], 1, self.cfg.model, self.cfg.temperature)
         self.cal_usage_LLM([messages], [str(responses[0])])
 
-        logging.info("LLM Response for HS step: " + str(responses[0]))
+        # logging.info("LLM Response for HS step: " + str(responses[0]))
         parameter_ranges, func_block = extract_to_hs(responses[0])
+        logging.info("Parameter ranges: " + str(parameter_ranges))
+        logging.info("Function block: " + str(func_block))
         if parameter_ranges is None or func_block is None:
             return None
         bounds = [value for value in parameter_ranges.values()]
 
         harmony_memory = self.initialize_harmony_memory(bounds)
         population_hs = self.create_population_hs(func_block, parameter_ranges, harmony_memory)
+        logging.info("Harmony Search population initialized. " +
+                     str(population_hs))
 
         if population_hs is None:
             return None
         elif len([individual for individual in population_hs if individual["exec_success"] is True]) == 0:
+            logging.info("No valid individuals in Harmony Search population. Skipping HS step.")
             self.function_evals -= self.cfg.hm_size
             return None
 
