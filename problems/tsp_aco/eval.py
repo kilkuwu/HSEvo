@@ -2,6 +2,7 @@ from os import path
 from aco import ACO
 import sys
 import gpt
+import time
 import inspect
 
 def get_heuristic_name(module, possible_names):
@@ -89,7 +90,9 @@ if __name__ == "__main__":
             print(float('inf'))  # Return worst possible score
     
     else:
+        st = time.time()
         dataset_dir = path.join(dataset_dir, "val")        # Validation mode - test on different problem sizes
+        results = []
         for test_size in [10, 20, 50, 100]:
             objs = []
             num_instances = 16  # Use fewer instances for validation
@@ -114,6 +117,15 @@ if __name__ == "__main__":
                     print(f"[*] Warning: Instance file {instance_file} not found")
             
             if objs:
-                print(f"[*] Average for {test_size}: {calculate_mean(objs)}")
+                result = calculate_mean(objs)
+                print(f"[*] Average for {test_size}: {result}")
+                results.append((test_size, result))
             else:
                 print(f"[*] No valid instances found for size {test_size}")
+        en = time.time()
+
+        print("[*] Final Results:")
+        for size, avg in results:
+            print(f"Size {size}: {avg}")
+        print(f"[*] Total time: {en - st:.2f} seconds")
+        
