@@ -2,6 +2,6 @@
 problem_name: tsp_ga
 problem_type: ga
 obj_type: min
-problem_size: 100 # problem size for training
+problem_size: 200 # problem size for training
 func_name: mutate
 description: Solving Traveling Salesman Problem (TSP) via Genetic Algorithm with evolved local search mutation operators. TSP requires finding the shortest path that visits all given nodes and returns to the starting node.

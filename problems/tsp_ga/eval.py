@@ -71,7 +71,7 @@ if __name__ == "__main__":
                 bg = time.time()
                 obj = solve(dist_mat)
                 en = time.time()
-                if en - bg > 10:
+                if en - bg > 9.4:
                     print(f"[*] Warning: Instance {i} took too long: {en - bg:.4f}s")
                     objs.append(float('inf'))  # Append worst possible score
                     break
