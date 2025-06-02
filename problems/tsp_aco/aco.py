@@ -19,17 +19,14 @@ class ACO():
         self.beta = beta
         
         # Set n_ants and n_iterations based on problem size (similar to GA)
+        self.gap = 20000
         if self.problem_size <= 20:
-            self.gap = 2000
             self.n_ants = 20
         elif self.problem_size <= 50:
-            self.gap = 1000
             self.n_ants = 30
         elif self.problem_size <= 100:
-            self.gap = 500
             self.n_ants = 30
         else:
-            self.gap = 500
             self.n_ants = 20
             
         # Initialize pheromone matrix

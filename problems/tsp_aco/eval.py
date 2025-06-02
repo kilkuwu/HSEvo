@@ -49,7 +49,7 @@ def calculate_mean(values):
 if __name__ == "__main__":
     print("[*] Running TSP ACO evaluation...")
 
-    problem_size = int(sys.argv[1])
+    # problem_size = int(sys.argv[1])
     root_dir = sys.argv[2]
     mood = sys.argv[3]
     assert mood in ['train', 'val']
@@ -59,40 +59,56 @@ if __name__ == "__main__":
     
     if mood == 'train':
         # Load training instances
-        objs = []
-        num_instances = 16  # Use 16 instances for training
+        ave_objs = []
         dataset_dir = path.join(dataset_dir, "train")
         
-        for i in range(num_instances):
-            instance_file = path.join(dataset_dir, f"{problem_size}_{i:02d}.inp")
-            if path.isfile(instance_file):
-                # Load distance matrix from file
-                with open(instance_file, 'r') as f:
-                    lines = f.readlines()
-                    n_cities = int(lines[0].strip())
-                    dist_mat = []
-                    for j in range(1, n_cities + 1):
-                        row = list(map(float, lines[j].strip().split()))
-                        dist_mat.append(row)
-                
-                # Solve instance
-                obj = solve(dist_mat)
-                print(f"[*] Instance {i}: {obj}")
-                objs.append(obj)
+        for test_size, num_instance in [(50, 4), (100, 8), (200, 4)]:
+            objs = []
+            for i in range(num_instance):
+                instance_file = path.join(dataset_dir, f"{test_size}_{i:02d}.inp")
+                if path.isfile(instance_file):
+                    # Load distance matrix from file
+                    with open(instance_file, 'r') as f:
+                        lines = f.readlines()
+                        n_cities = int(lines[0].strip())
+                        dist_mat = []
+                        for j in range(1, n_cities + 1):
+                            row = list(map(float, lines[j].strip().split()))
+                            dist_mat.append(row)
+                    
+                    # Solve instance
+                    bg = time.time()
+                    obj = solve(dist_mat)
+                    en = time.time()
+                    if en - bg > 10:
+                        print(
+                            f"[*] Warning: Instance {i}, Size {test_size} took too long: {en - bg:.4f}s")
+                        objs.append(float('inf'))  # Append worst possible score
+                        break
+                    else: 
+                        print(f"[*] Instance {i}, Size {test_size}: {obj}, Time: {en - bg:.4f}s")
+                        objs.append(obj)
+                else:
+                    print(f"[*] Warning: Instance file {instance_file} not found")
+
+            if objs:
+                ave_objs.append(calculate_mean(objs))
             else:
-                print(f"[*] Warning: Instance file {instance_file} not found")
+                print(f"[*] Warning: No valid instances found for size {test_size}")
+                ave_objs.append(float('inf'))  # Append worst possible score for this size
+                break
         
-        if objs:
-            print("[*] Average:")
-            print(calculate_mean(objs))
+        print("[*] Sum:")
+        if ave_objs:
+            print(sum(ave_objs))
         else:
-            print("[*] No valid instances found")
             print(float('inf'))  # Return worst possible score
     
     else:
         dataset_dir = path.join(dataset_dir, "val")
         results = []
         for test_size in [10, 20, 50, 100, 200]:
+        # for test_size in [ 200]:
             times = []
             objs = []
             num_instances = 16  # Use fewer instances for validation
@@ -131,4 +147,3 @@ if __name__ == "__main__":
         print("[*] Final Results:")
         for size, avg, tim in results:
             print(f"Size {size}: {avg} in {tim:.4f}s")
-        

@@ -264,21 +264,18 @@ class GeneticAlgorithmTSP:
         # Set parameters based on problem size
         self.select_probability = 0.7
         
+        self.gap = 20000
         if self.number_of_city <= 20:
             self.mutate_probability = 0.01
-            self.gap = 5000
             self.initial_probability = 0.8
         elif self.number_of_city <= 50:
             self.mutate_probability = 0.01
-            self.gap = 1000
             self.initial_probability = 0.85
         elif self.number_of_city <= 100:
             self.mutate_probability = 0.005
-            self.gap = 200
             self.initial_probability = 0.9
         else:
             self.mutate_probability = 0.005
-            self.gap = 200
             self.initial_probability = 1.0
         
         self.population_size = min(self.number_of_city // 2, 100)

@@ -21,6 +21,8 @@ def main(cfg):
     logging.info(f"Using LLM: {cfg.model}")
     logging.info(f"Using Algorithm: {cfg.algorithm}")
 
+    logging.info(f"API_KEY: {os.getenv("GEMINI_API_KEY")}")
+
     # Main algorithm
     lhh = LHH(cfg, ROOT_DIR)
     best_code_overall, best_code_path_overall = lhh.evolve()

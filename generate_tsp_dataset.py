@@ -1,5 +1,3 @@
-
-#!/usr/bin/env python3
 """
 Generate TSP test cases with the specified format:
 - First line: number of cities
@@ -11,20 +9,16 @@ import os
 import numpy as np
 import random
 
-def generate_tsp_instance(size, seed=None):
+def generate_tsp_instance(size):
     """
     Generate a single TSP instance.
     
     Args:
         size (int): Number of cities
-        seed (int, optional): Random seed for reproducibility
     
     Returns:
         numpy.ndarray: Symmetric distance matrix
     """
-    if seed is not None:
-        np.random.seed(seed)
-        random.seed(seed)
     
     # Generate upper triangular matrix with random costs (1-1000)
     matrix = np.zeros((size, size), dtype=float)
@@ -71,7 +65,7 @@ def generate_tsp_datasets(mood):
     
     # Problem sizes and number of instances
     if mood == 'train':
-        problem_sizes = [50]
+        problem_sizes = [10, 20, 50, 100, 200]
         os.makedirs(os.path.join(output_dir, "train"), exist_ok=True)
         output_dir = os.path.join(output_dir, "train")
     else: 
@@ -79,10 +73,12 @@ def generate_tsp_datasets(mood):
         os.makedirs(os.path.join(output_dir, "val"), exist_ok=True)
         output_dir = os.path.join(output_dir, "val")
     n_instances = 16
+
+    seed = 1234 + (mood == "train") * 1000
+    print(seed)
     
-    # Set global seed for reproducibility
-    np.random.seed(1234)
-    random.seed(1234)
+    np.random.seed(seed)
+    random.seed(seed)
     
     total_files = 0
     
@@ -100,8 +96,7 @@ def generate_tsp_datasets(mood):
         
         for instance_num in range(n_instances):
             # Generate instance with unique seed
-            seed = 1234 + size * 1000 + instance_num
-            matrix = generate_tsp_instance(size, seed)
+            matrix = generate_tsp_instance(size)
             
             # Create filename: {size}_{num:02d}.inp
             filename = f"{size}_{instance_num:02d}.inp"
@@ -201,7 +196,6 @@ def generate_sample_with_floats():
     
     for size in sizes:
         # Generate matrix with float costs
-        np.random.seed(1234 + size)
         matrix = np.zeros((size, size))
         
         # Fill upper triangle with random float values (1.0 to 1000.0)
